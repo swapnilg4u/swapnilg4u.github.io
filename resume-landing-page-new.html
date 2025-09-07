@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Engineer - Online Resume</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #22d3ee;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-100px) rotate(120deg); }
+            66% { transform: translateY(100px) rotate(240deg); }
+        }
+
+        .shape1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .shape2 {
+            width: 200px;
+            height: 200px;
+            bottom: -50px;
+            left: -50px;
+            animation-delay: 5s;
+        }
+
+        .shape3 {
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            left: 50%;
+            animation-delay: 10s;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Resume Card */
+        #resume-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header Section */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 4rem 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .name {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            animation: fadeInLeft 0.8s ease-out;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            opacity: 0.95;
+            margin-bottom: 1rem;
+            animation: fadeInLeft 0.8s ease-out 0.2s both;
+        }
+
+        .experience-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+            animation: fadeInLeft 0.8s ease-out 0.4s both;
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Contact Info */
+        .contact-info {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .contact-item:hover {
+            transform: translateX(5px);
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Content Sections */
+        .content {
+            padding: 3rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Skills Grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .skill-category {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .skill-category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .skill-category h3 {
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .skill-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .skill-tag {
+            background: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--gray);
+            transition: all 0.3s ease;
+        }
+
+        .skill-tag:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Experience Timeline */
+        .experience-item {
+            position: relative;
+            padding-left: 2rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-left: 2px solid var(--primary);
+        }
+
+        .experience-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .experience-item:hover::before {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); }
+            50% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.1); }
+            100% { box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); }
+        }
+
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .experience-title {
+            font-size: 1.2rem;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .experience-date {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .experience-company {
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .experience-description {
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        /* PDF Export Button */
+        .export-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .export-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .name {
+                font-size: 2rem;
+            }
+
+            .title {
+                font-size: 1.2rem;
+            }
+
+            .header {
+                padding: 2rem 1.5rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .export-btn {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.8rem 1.5rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2000;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="floating-shape shape1"></div>
+        <div class="floating-shape shape2"></div>
+        <div class="floating-shape shape3"></div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div id="resume-content">
+            <!-- Header Section -->
+            <div class="header">
+                <div class="header-content">
+                    <h1 class="name">Swapnil Gupta</h1>
+                    <p class="title">Software Developer I</p>
+                    <span class="experience-badge">4 Years of Experience</span>
+                    
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                            </svg>
+                            <span>swapnilg4u@gmail.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                            </svg>
+                            <span>+91 8839772627</span>
+                        </div>
+                        <div class="contact-item">
+                            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Pune, Maharashtra</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Sections -->
+            <div class="content">
+                <!-- About Section -->
+                <div class="section">
+                    <h2 class="section-title">Professional Summary</h2>
+                    <p style="color: var(--gray); line-height: 1.8;">
+                        Experienced Software Engineer with 4 years of expertise in <b>Python development, Csharp .NET, Azure DevOps, Data Science, and SQL database management</b>. 
+                        Passionate about building scalable solutions, analyzing complex datasets, and implementing machine learning models to drive 
+                        business insights. Proven track record of delivering high-quality software solutions and collaborating effectively with 
+                        cross-functional teams.
+                    </p>
+                </div>
+
+                <!-- Skills Section -->
+                <div class="section">
+                    <h2 class="section-title">Technical Skills</h2>
+                    <div class="skills-grid">
+                        <div class="skill-category">
+                            <h3>Programming Languages</h3>
+                            <div class="skill-items">
+                                <span class="skill-tag">Python</span>
+                                <span class="skill-tag">SQL</span>
+                                <span class="skill-tag">Csharp</span>
+                                <span class="skill-tag">HTML/CSS</span>
+                                <span class="skill-tag">JavaScript</span>
+                                <!-- <span class="skill-tag"></span> -->
+                            </div>
+                        </div>
+                        <div class="skill-category">
+                            <h3>Data Science & ML</h3>
+                            <div class="skill-items">
+                                <span class="skill-tag">Pandas</span>
+                                <span class="skill-tag">NumPy</span>
+                                <span class="skill-tag">Scikit-learn</span>
+                                <span class="skill-tag">TensorFlow</span>
+                                <span class="skill-tag">PyTorch</span>
+                            </div>
+                        </div>
+                        <div class="skill-category">
+                            <h3>Databases</h3>
+                            <div class="skill-items">
+                                <span class="skill-tag">PostgreSQL</span>
+                                <span class="skill-tag">MySQL</span>
+                                <span class="skill-tag">MongoDB</span>
+                                <span class="skill-tag">Redis</span>
+                            </div>
+                        </div>
+                        <div class="skill-category">
+                            <h3>Tools & Technologies</h3>
+                            <div class="skill-items">
+                                <span class="skill-tag">Git</span>
+                                <span class="skill-tag">Bitbucket</span>
+                                <span class="skill-tag">Github</span>
+                                <span class="skill-tag">Jupyter</span>
+                                <span class="skill-tag">Azure</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Experience Section -->
+                <div class="section">
+                    <h2 class="section-title">Professional Experience</h2>
+                    
+                    <div class="experience-item">
+                        <div class="experience-header">
+                            <h3 class="experience-title">Software Developer I</h3>
+                            <span class="experience-date">Jan 2023 - Present</span>
+                        </div>
+                        <p class="experience-company">FIS Global</p>
+                        <p class="experience-description">
+                            • Designed and implemented dynamic user interfaces for US-based banking clients using C sharp .NET,
+                                Python and SQL,<br> focusing on delivering intuitive and responsive front-end solutions.<br>
+                            • Ensured compliance with Web Content Accessibility Guidelines (WCAG) 2.2, improving usability for all
+                            users.<br>
+                            • Applied Test-Driven Development (TDD) practices to deliver high-quality, maintainable, and reliable
+                             code.<br>
+                            • Utilized Azure DevOps (ADO) and Agile methodologies to enhance team collaboration streamline
+                            development,<br> and adapt efficiently to client needs.<br>
+                            • Streamlined integration, testing, and deployment with CI/CD pipelines in Azure DevOps.<br>
+
+                        </p>
+                    </div>
+                    <!-- <div class="experience-item">
+                        <div class="experience-header">
+                            <h3 class="experience-title">Data Engineer</h3>
+                            <span class="experience-date">Jun 2021 - Dec 2022</span>
+                        </div>
+                        <p class="experience-company">DataCorp Analytics</p>
+                        <p class="experience-description">
+                            • Built ETL pipelines using Python and SQL for real-time data processing<br>
+                            • Developed predictive models using scikit-learn and TensorFlow<br>
+                            • Created interactive dashboards using Tableau for business stakeholders<br>
+                            • Collaborated with cross-functional teams to deliver data-driven solutions
+                        </p>
+                    </div>
+
+                    <div class="experience-item">
+                        <div class="experience-header">
+                            <h3 class="experience-title">Junior Software Developer</h3>
+                            <span class="experience-date">Jul 2020 - May 2021</span>
+                        </div>
+                        <p class="experience-company">StartUp Innovations</p>
+                        <p class="experience-description">
+                            • Developed Python scripts for data analysis and automation<br>
+                            • Maintained and optimized SQL databases<br>
+                            • Participated in agile development processes<br>
+                            • Contributed to full-stack development projects
+                        </p>
+                    </div> -->
+                </div>
+
+                <!-- Education Section -->
+                <div class="section">
+                    <h2 class="section-title">Education</h2>
+                    <div class="experience-item">
+                        <div class="experience-header">
+                            <h3 class="experience-title">Bachelor of Engineering in Computer Science</h3>
+                            <span class="experience-date">2016 - 2021</span>
+                        </div>
+                        <p class="experience-company">Indira College of Engineering and Management, Pune</p>
+                        <p class="experience-description">
+                            
+                            • Relevant Coursework: Data Structures, Algorithms, Machine Learning, Database Systems<br>
+                        </p>
+                    </div>
+                    <div class="experience-item">
+                        <div class="experience-header">
+                            <h3 class="experience-title">Senior Secondary School</h3>
+                            <span class="experience-date">2016</span>
+                        </div>
+                        <p class="experience-company">Krishna Public School, Raipur</p>
+                        <p class="experience-description">
+                            
+                            • Stream : Science <br>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Button -->
+    <button class="export-btn"  ><!-- onclick="exportToPDF()" -->
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+        <a target="_blank" 
+            href="https://media.licdn.com/dms/document/media/v2/D4D2DAQFS6vPpU0jPKQ/profile-treasury-document-pdf-analyzed/B4DZkjYH.0GkAg-/0/1757235152439?e=1758153600&v=beta&t=Q24RZpLH7zBhM0HugQC4YoTmslCMky2CzEbD1ds1I_g"
+            style="color: inherit; text-decoration: inherit;">
+            Export Resume
+        </a>
+    </button>
+
+    <script>
+        async function exportToPDF() {
+            const loading = document.getElementById('loading');
+            loading.classList.add('active');
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // PDF Content
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 20;
+                const lineHeight = 7;
+                let yPosition = margin;
+                
+                // Header Background
+                doc.setFillColor(99, 102, 241);
+                doc.rect(0, 0, pageWidth, 60, 'F');
+                
+                // Name and Title
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(24);
+                doc.setFont(undefined, 'bold');
+                doc.text('Swapnil Gupta', margin, 25);
+                
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'normal');
+                doc.text('Software Developer I', margin, 35);
+                
+                doc.setFontSize(10);
+                doc.text('4 Years of Experience', margin, 45);
+                
+                // Contact Info
+                doc.setFontSize(9);
+                doc.text('Email: swapnilg4u@gmail.com | Phone: +91 8839772627 | Location: Mumbai, Maharashtra', margin, 55);
+                
+                // Reset text color
+                doc.setTextColor(0, 0, 0);
+                yPosition = 70;
+                
+                // Professional Summary
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('PROFESSIONAL SUMMARY', margin, yPosition);
+                yPosition += lineHeight;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                const summaryText = 'Experienced Software Engineer with 4 years of expertise in Python development, data science, and SQL database management. Passionate about building scalable solutions, analyzing complex datasets, and implementing machine learning models to drive business insights.';
+                const summaryLines = doc.splitTextToSize(summaryText, pageWidth - 2 * margin);
+                doc.text(summaryLines, margin, yPosition);
+                yPosition += summaryLines.length * 5 + 10;
+                
+                // Technical Skills
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('TECHNICAL SKILLS', margin, yPosition);
+                yPosition += lineHeight;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                
+                const skills = [
+                    'Programming Languages: Python, SQL, JavaScript, R',
+                    'Data Science & ML: Pandas, NumPy, Scikit-learn, TensorFlow, PyTorch',
+                    'Databases: PostgreSQL, MySQL, MongoDB, Redis',
+                    'Tools & Technologies: Git, Docker, AWS, Jupyter, Tableau'
+                ];
+                
+                skills.forEach(skill => {
+                    doc.text('• ' + skill, margin + 5, yPosition);
+                    yPosition += lineHeight;
+                });
+                yPosition += 5;
+                
+                // Professional Experience
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('PROFESSIONAL EXPERIENCE', margin, yPosition);
+                yPosition += lineHeight;
+                
+                // Experience entries
+                const experiences = [
+                    {
+                        title: 'Senior Software Engineer',
+                        company: 'Tech Solutions Inc.',
+                        date: 'Jan 2023 - Present',
+                        points: [
+                            'Led development of data pipeline processing 10M+ records daily using Python and Apache Spark',
+                            'Implemented machine learning models that improved prediction accuracy by 35%',
+                            'Optimized SQL queries resulting in 50% reduction in database response time',
+                            'Mentored junior developers and conducted code reviews'
+                        ]
+                    },
+                    {
+                        title: 'Data Engineer',
+                        company: 'DataCorp Analytics',
+                        date: 'Jun 2021 - Dec 2022',
+                        points: [
+                            'Built ETL pipelines using Python and SQL for real-time data processing',
+                            'Developed predictive models using scikit-learn and TensorFlow',
+                            'Created interactive dashboards using Tableau for business stakeholders',
+                            'Collaborated with cross-functional teams to deliver data-driven solutions'
+                        ]
+                    }
+                ];
+                
+                experiences.forEach(exp => {
+                    // Check if we need a new page
+                    if (yPosition > pageHeight - 60) {
+                        doc.addPage();
+                        yPosition = margin;
+                    }
+                    
+                    doc.setFont(undefined, 'bold');
+                    doc.text(exp.title, margin, yPosition);
+                    doc.setFont(undefined, 'normal');
+                    doc.text(exp.date, pageWidth - margin - 40, yPosition);
+                    yPosition += 5;
+                    
+                    doc.setFont(undefined, 'italic');
+                    doc.text(exp.company, margin, yPosition);
+                    yPosition += 5;
+                    
+                    doc.setFont(undefined, 'normal');
+                    exp.points.forEach(point => {
+                        const lines = doc.splitTextToSize('• ' + point, pageWidth - 2 * margin - 5);
+                        doc.text(lines, margin + 5, yPosition);
+                        yPosition += lines.length * 5;
+                    });
+                    yPosition += 5;
+                });
+                
+                // Education
+                if (yPosition > pageHeight - 40) {
+                    doc.addPage();
+                    yPosition = margin;
+                }
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('EDUCATION', margin, yPosition);
+                yPosition += lineHeight;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'bold');
+                doc.text('Bachelor of Science in Computer Science', margin, yPosition);
+                doc.setFont(undefined, 'normal');
+                doc.text('2016 - 2020', pageWidth - margin - 40, yPosition);
+                yPosition += 5;
+                
+                doc.setFont(undefined, 'italic');
+                doc.text('University of Technology', margin, yPosition);
+                yPosition += 5;
+                
+                doc.setFont(undefined, 'normal');
+                doc.text('• GPA: 3.8/4.0', margin + 5, yPosition);
+                yPosition += 5;
+                doc.text('• Dean\'s List: 2018, 2019, 2020', margin + 5, yPosition);
+                
+                // Save the PDF
+                doc.save('Resume_John_Doe.pdf');
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please try again.');
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+        
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
